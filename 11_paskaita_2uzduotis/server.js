@@ -105,27 +105,30 @@ app.get('/categoryvalue', async (req, res) => {
     const con = await client.connect();
     const data = await con
       .db(DB)
-      .collection('categories')
+      .collection('products')
       .aggregate([
         {
           $lookup: {
-            from: 'products',
-            localField: '_id',
-            foreignField: 'categoryId',
-            as: 'products',
+            from: 'categories',
+            localField: 'categoryId',
+            foreignField: '_id',
+            as: 'category_info',
+          },
+        },
+        {
+          $unwind: '$category_info',
+        },
+        {
+          $group: {
+            _id: { category: '$category_info.title' },
+            totalPrices: { $sum: '$price' },
           },
         },
       ])
       .toArray();
     await con.close();
 
-    const result = data.map(
-      ({ title, products }) =>
-        `${title}: ${products
-          .map((el) => el.price)
-          .reduce((acc, curr) => acc + curr, 0)}`
-    );
-    res.send(result);
+    res.send(data);
   } catch (error) {
     res.status(500).send(error);
   }
