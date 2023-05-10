@@ -54,7 +54,7 @@ app.post('/users', async (req, res) => {
 app.get('/comments', async (req, res) => {
   try {
     const con = await client.connect();
-    const comments = await con
+    const data = await con
       .db(DB)
       .collection('comments')
       .aggregate([
@@ -63,17 +63,24 @@ app.get('/comments', async (req, res) => {
             from: 'users',
             localField: 'userId',
             foreignField: '_id',
-            as: 'user_info',
+            as: 'user',
+          },
+        },
+        {
+          $unwind: '$user',
+        },
+        {
+          $project: {
+            text: 1,
+            date: 1,
+            user: { name: 1 },
           },
         },
       ])
       .toArray();
     await con.close();
-    const result = comments.map(
-      ({ text, date, user_info }) =>
-        `(${date}), '${text}', /${user_info.map((el) => el.name)}/`
-    );
-    res.send(result);
+
+    res.send(data);
   } catch (error) {
     res.status(500).send(error);
   }
