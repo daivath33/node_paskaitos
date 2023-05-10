@@ -17,7 +17,7 @@ client
   })
   .catch((error) => console.log('No connection...', error));
 
-// 2) POST / create categories
+// 2) POST /create categories
 app.post('/categories', async (req, res) => {
   try {
     const con = await client.connect();
@@ -71,7 +71,7 @@ app.get('/categories', async (req, res) => {
   }
 });
 
-// 5) GET  / get all products with category
+// 5) GET  /get all products with category
 app.get('/products', async (req, res) => {
   try {
     const con = await client.connect();
@@ -99,7 +99,7 @@ app.get('/products', async (req, res) => {
   }
 });
 
-// 6) GET / categoryvalue/ resulyatas: kiekvienos kategorijos produktu kainos sumos
+// 6) GET /categoryvalue/ rezultatas: kategorijos su visu produktu kainos suma
 app.get('/categoryvalue', async (req, res) => {
   try {
     const con = await client.connect();
