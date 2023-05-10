@@ -50,7 +50,7 @@ app.post('/users', async (req, res) => {
   }
 });
 
-// 3) GET /comments/ atsius visus komentarus su vartotoju vardais (date, comment ir name od user)
+// 3) GET /comments/ atsius visus komentarus su vartotoju vardais (date, comment ir name of user)
 app.get('/comments', async (req, res) => {
   try {
     const con = await client.connect();
