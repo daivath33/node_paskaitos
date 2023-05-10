@@ -17,6 +17,7 @@ client
   })
   .catch((error) => console.error('no connection...', error));
 
+// 1) GET /users/ atsius visus vartotojus
 app.get('/users', async (req, res) => {
   try {
     const con = await client.connect();
@@ -28,6 +29,7 @@ app.get('/users', async (req, res) => {
   }
 });
 
+// 2) POST /users/ irasys viena vartotoja
 app.post('/users', async (req, res) => {
   try {
     const con = await client.connect();
@@ -47,17 +49,9 @@ app.post('/users', async (req, res) => {
     res.status(500).send(error);
   }
 });
+
+// 3) GET /comments/ atsius visus komentarus su vartotoju vardais (date, comment ir name od user)
 app.get('/comments', async (req, res) => {
-  try {
-    const con = await client.connect();
-    const comments = await con.db(DB).collection('comments').find().toArray();
-    await con.close();
-    res.send(comments);
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
-app.get('/commentsWithUsers', async (req, res) => {
   try {
     const con = await client.connect();
     const comments = await con
@@ -72,38 +66,20 @@ app.get('/commentsWithUsers', async (req, res) => {
             as: 'user_info',
           },
         },
-        {
-          $unwind: '$user_info',
-        },
       ])
       .toArray();
     await con.close();
-    res.send(comments);
+    const result = comments.map(
+      ({ text, date, user_info }) =>
+        `(${date}), '${text}', /${user_info.map((el) => el.name)}/`
+    );
+    res.send(result);
   } catch (error) {
     res.status(500).send(error);
   }
 });
 
-app.post('/comments/:id', async (req, res) => {
-  try {
-    const con = await client.connect();
-    const { id } = req.params;
-    const comment = await con
-      .db(DB)
-      .collection('comments')
-      .insertMany([
-        {
-          date: Date.now(),
-          text: req.body.text,
-          userId: new ObjectId(id),
-        },
-      ]);
-    await con.close();
-    res.send(comment);
-  } catch (error) {
-    res.status(500).send(error);
-  }
-});
+// 4) DELETE /comments/:id istrins viena komentara pagal jo ID
 app.delete('/comments/:id', async (req, res) => {
   try {
     const con = await client.connect();
@@ -113,6 +89,27 @@ app.delete('/comments/:id', async (req, res) => {
       .collection('comments')
       .deleteOne({ _id: new ObjectId(id) });
     res.json({ message: 'successfully deleted...' });
+    await con.close();
+    res.send(comment);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+// POST /comments/ irasys viena komentara su vartotojo ID
+app.post('/comments/:id', async (req, res) => {
+  try {
+    const con = await client.connect();
+    const { id } = req.params;
+    const comment = await con
+      .db(DB)
+      .collection('comments')
+      .insertMany([
+        {
+          date: new Date().toISOString(),
+          text: req.body.text,
+          userId: new ObjectId(id),
+        },
+      ]);
     await con.close();
     res.send(comment);
   } catch (error) {
