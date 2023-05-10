@@ -17,7 +17,7 @@ client
   })
   .catch((error) => console.log('No connection...', error));
 
-// POST / create categories
+// 2) POST / create categories
 app.post('/categories', async (req, res) => {
   try {
     const con = await client.connect();
@@ -37,7 +37,7 @@ app.post('/categories', async (req, res) => {
   }
 });
 
-// POST /create products with category ID
+// 3) POST /create products with category ID
 app.post('/products/:id', async (req, res) => {
   try {
     const con = await client.connect();
